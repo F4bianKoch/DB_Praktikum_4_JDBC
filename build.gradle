@@ -1,0 +1,30 @@
+plugins {
+  id 'application'
+}
+
+def dbUrl = project.findProperty('dbUrl') ?: 'defaultDbUrl'
+def dbUser = project.findProperty('dbUser') ?: 'defaultUser'
+def dbPassword = project.findProperty('dbPassword') ?: 'defaultPassword'
+def mainClassName = 'com.dbInternship.Store'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'org.postgresql:postgresql:42.6.0'
+}
+
+application {
+  mainClass = mainClassName
+  applicationDefaultJvmArgs = [
+      "-DdbUrl=${dbUrl}",
+      "-DdbUser=${dbUser}",
+      "-DdbPassword=${dbPassword}"
+  ]
+}
+
+run() {
+  standardInput = System.in                                                                                                                  
+  standardOutput = System.out  
+}
