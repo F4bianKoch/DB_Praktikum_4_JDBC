@@ -13,15 +13,15 @@ import java.io.*;
  *  3. "Bestellung" - UI for generating a new order
  */
 public class Store {
-    public static void main (String args[]) {
+    public static void main(String args[]) {
         if (args.length != 0) {
-            System.out.println ("Usage: java supermarkt");
+            System.out.println("Usage: java supermarkt");
             System.exit(1);
         }
 
         Store store = new Store();
         String aufgabe = null;
-        BufferedReader userin = new BufferedReader (new InputStreamReader (System.in));
+        BufferedReader userin = new BufferedReader(new InputStreamReader (System.in));
 
         do {
             System.out.println("Geben Sie ein: Waren oder Bestellungen oder Bestellen oder #!");
@@ -34,7 +34,7 @@ public class Store {
                 break;
             }
 
-            if (aufgabe.equals ("Waren")) {
+            if (aufgabe.equals("Waren")) {
                 store.alleWaren();
             } 
             if (aufgabe.equals("Bestellungen")) {
@@ -49,7 +49,7 @@ public class Store {
         } while (!aufgabe.startsWith("#") || aufgabe == null);
     }
 
-    public void alleWaren () {
+    public void alleWaren() {
         return;
     }
         
