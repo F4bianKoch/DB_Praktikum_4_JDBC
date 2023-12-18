@@ -2,6 +2,8 @@ package com.dbInternship;
 
 import java.io.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.utils.DbUtils;
 
@@ -24,7 +26,7 @@ public class Store {
 
         Store store = new Store();
         String aufgabe = null;
-        BufferedReader userin = new BufferedReader(new InputStreamReader (System.in));
+        BufferedReader userin = new BufferedReader(new InputStreamReader(System.in));
 
         do {
             System.out.println("Geben Sie ein: Waren oder Bestellungen oder Bestellen oder #!");
@@ -32,8 +34,7 @@ public class Store {
             try {
                 aufgabe = userin.readLine();
             } catch (Exception e) {
-                System.out.println("Error while reading user Input!");
-                e.printStackTrace();
+                System.out.println("Falscher Input");
                 break;
             }
 
@@ -89,19 +90,20 @@ public class Store {
                 + "where b.kundid = ?" 
             ); 
 
-            BufferedReader userin = new BufferedReader(new InputStreamReader (System.in));
+            BufferedReader userin = new BufferedReader(new InputStreamReader(System.in));
             System.out.println("Bitte Kundennummer(n) (seperiert in Kommata) angeben: ");  
             try {
-                custNum = userin.readLine().split(", ");
+                custNum = userin.readLine().split(",");
             } catch (Exception e) {
-                System.out.println("Falscher Input");
+                System.out.println("Fehler beim Einlesen!");
+                e.printStackTrace();
             }
             
             System.out.println("\nBestell ID \tDatum \t\tStatus \tKunde");
             System.out.println("--------------------------------------------------------------");
 
             for (String customer : custNum) {
-                stmt.setInt(1, Integer.valueOf(customer));
+                stmt.setInt(1, Integer.valueOf(customer.trim()));
                 ResultSet rs = stmt.executeQuery();
                 
                 while (rs.next()) {
@@ -124,7 +126,58 @@ public class Store {
     }
         
     public void bestellen() {
-        return;
+        try (Connection conn = DbUtils.connect()) {
+            BufferedReader userin = new BufferedReader(new InputStreamReader(System.in));
+            ArrayList<String> products = null;
+            ArrayList<String> quantitys = null;
+            String custName = null;
+
+            try {
+
+                System.out.println("Bitte Kundenname eingeben: ");  
+                custName = userin.readLine();
+
+                System.out.println("Bitte Produkte eingeben (kommaseperiert): ");  
+                products = new ArrayList<>(Arrays.asList(userin.readLine().split(",")));
+
+                System.out.println("Bitte Anzahl eingeben: (kommaseperiert)");  
+                quantitys = new ArrayList<>(Arrays.asList(userin.readLine().split(",")));
+
+            } catch (IOException e) {
+                System.out.println("Fehler beim Einlesen!");
+                e.printStackTrace();
+            }
+
+            Statement stmt = conn.createStatement();
+            stmt.execute(
+                "insert into store.bestellung "
+                + "values("
+                    + "nextval('store.bestellid'), "
+                    + "CURRENT_DATE, "
+                    + "0, "
+                    + "(select k.kundeid from store.kunde k where k.kname = '" + custName + "')"
+                + ")"
+            );
+
+            PreparedStatement pstmt = conn.prepareStatement(
+                "insert into store.enthaelt "
+                + "values("
+                    + "currval('store.bestellid'), "
+                    + "(select w.warenid from store.ware w where w.bezeichnung = ?), "
+                    + "?"
+                + ")"
+            );
+
+            for (int i = 0; i < products.size(); i++) {
+                pstmt.setString(1, products.get(i).trim());
+                pstmt.setInt(2, Integer.valueOf(quantitys.get(i).trim()));
+
+                pstmt.executeUpdate();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 
