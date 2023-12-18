@@ -79,7 +79,48 @@ public class Store {
     }
         
     public void alleBestellungen() {
-        return;
+        String[] custNum = null;
+
+        try (Connection conn = DbUtils.connect()){
+            PreparedStatement stmt = conn.prepareStatement(
+                "select b.bestid as bid, b.datum as date, b.status as status, k.kname as cid "
+                + "from store.bestellung b "
+                + "inner join store.kunde k on k.kundeid = b.kundid "
+                + "where b.kundid = ?" 
+            ); 
+
+            BufferedReader userin = new BufferedReader(new InputStreamReader (System.in));
+            System.out.println("Bitte Kundennummer(n) (seperiert in Kommata) angeben: ");  
+            try {
+                custNum = userin.readLine().split(", ");
+            } catch (Exception e) {
+                System.out.println("Falscher Input");
+            }
+            
+            System.out.println("\nBestell ID \tDatum \t\tStatus \tKunde");
+            System.out.println("--------------------------------------------------------------");
+
+            for (String customer : custNum) {
+                stmt.setInt(1, Integer.valueOf(customer));
+                ResultSet rs = stmt.executeQuery();
+                
+                while (rs.next()) {
+                    System.out.print(rs.getString("bid") + "\t\t");
+                    System.out.print(rs.getString("date") + "\t");
+                    System.out.print(rs.getString("status") + "\t");
+                    System.out.print(rs.getString("cid") + "\n");
+                }
+            }
+
+        } catch (SQLException | NumberFormatException e) {
+            System.out.println("Datenbankfehler: Bitte Angabe ueberpruefen!");
+            for (String customer : custNum) {
+                System.out.println(customer);
+            }
+            e.printStackTrace();
+        }
+
+
     }
         
     public void bestellen() {
