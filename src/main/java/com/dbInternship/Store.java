@@ -1,6 +1,9 @@
 package com.dbInternship;
 
 import java.io.*;
+import java.sql.*;
+
+import com.utils.DbUtils;
 
 /**
  * Main class for store front.
@@ -50,7 +53,29 @@ public class Store {
     }
 
     public void alleWaren() {
-        return;
+        try (Connection conn = DbUtils.connect()) {
+            Statement stmt = conn.createStatement();
+
+            ResultSet rs = stmt.executeQuery(
+                "select w.bezeichnung as Bezeichnung, w.preis as Preis, w.vorrat as Vorrat, k.kname as Kategorie"
+                + " from store.ware w"
+                + " inner join store.kategorie k on w.katid = k.katid"
+            );
+
+            System.out.println("\nBezeichnung \tPreis \tVorrat \tKategorie");
+            System.out.println("--------------------------------------------------------------");
+
+            while (rs.next()) {
+                System.out.print(rs.getString("Bezeichnung") + "\t");
+                System.out.print(rs.getString("Preis") + "\t");
+                System.out.print(rs.getString("Vorrat") + "\t");
+                System.out.print(rs.getString("Kategorie") + "\n");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Internal SQL Error: ");
+            e.printStackTrace();
+        }
     }
         
     public void alleBestellungen() {
